@@ -21,7 +21,7 @@
     Show the output of the script on console or not
     
     .EXAMPLE
-    .\Get-Shortcuts.ps1 -ExcludePaths "Accessibility", "Accessories", "Administrative" -FilePath "C:\matnav\shortcuts.csv" -SearchPath "C:\ProgramData\Microsoft\Windows\Start Menu" -ShowOutput $true
+    .\Get-DesktopShortcuts.ps1 -ExcludePaths "Accessibility", "Accessories", "Administrative" -FilePath "C:\matnav\shortcuts.csv" -SearchPath "C:\ProgramData\Microsoft\Windows\Start Menu" -ShowOutput $true
     This will run the script and export the shortcuts to a CSV file, excluding any paths that contain the specified strings, looking for shortcuts in "C:\ProgramData\Microsoft\Windows\Start Menu" and Showing the output on console.
     
     .NOTES
@@ -31,10 +31,12 @@
 
 param (
     [string[]]$ExcludePaths = @(),
-    [string]$FilePath = "c:\matnav\shortcuts.csv"
+    [string]$FilePath = "c:\matnav\shortcuts.csv",
+    [string]$SearchPath = "C:\ProgramData\Microsoft\Windows\Start Menu",
+    [bool]$ShowOutput = $false
 )
 
-function Get-Shortcuts {
+function Get-DesktopShortcuts {
     # Define an array to store the shortcut objects
     $Shortcuts = @()
 
@@ -48,14 +50,27 @@ function Get-Shortcuts {
     foreach ($Shortcut in $AllShortcuts) {
         # Check if the shortcut path contains any of the excluded strings
         if ($ExcludePaths -notcontains ($Shortcut.DirectoryName | Select-String -SimpleMatch -Quiet)) {
-            # Create a custom object to store the shortcut properties
-            $Properties = @{
-                ShortcutName     = $Shortcut.Name
-                ShortcutFull     = $Shortcut.FullName
-                ShortcutPath     = $shortcut.DirectoryName
-                Target           = $Shell.CreateShortcut($Shortcut).targetpath
-                WorkingDirectory = $Shell.CreateShortcut($Shortcut).WorkingDirectory
-            }
-            $Shortcuts += New-Object PSObject -Property $Properties
-            if($ShowOutput){
-                Write-Output "ShortcutName: $($Properties.ShortcutName) ShortcutFull: $($Properties.ShortcutFull) ShortcutPath: $($Properties.ShortcutPath) Target: $
+# Create a custom object to store the shortcut properties
+$Properties = @{
+ShortcutName = $Shortcut.Name
+ShortcutFull = $Shortcut.FullName
+ShortcutPath = $shortcut.DirectoryName
+Target = $Shell.CreateShortcut($Shortcut).targetpath
+WorkingDirectory = $Shell.CreateShortcut($Shortcut).WorkingDirectory
+}
+$Shortcuts += New-Object PSObject -Property $Properties
+if($ShowOutput){
+Write-Output "ShortcutName: $($Properties.ShortcutName) ShortcutFull: $($Properties.ShortcutFull) ShortcutPath: $($Properties.ShortcutPath) Target: $($Properties.Target) WorkingDirectory: $($Properties.WorkingDirectory)"
+}
+}
+}
+# Release the COM object
+[Runtime.InteropServices.Marshal]::ReleaseComObject($Shell) | Out-Null
+# Export the array to a CSV file
+$Shortcuts | ConvertTo-Csv -NoTypeInformation | Out-File $FilePath -Force
+
+# Return the number of shortcuts found
+Write-Output "Found $($Shortcuts.Count) shortcuts"
+}
+
+Get-Shortcuts
