@@ -1,4 +1,4 @@
-#
+<#
     .SYNOPSIS
     This script is used to get all the shortcuts on the desktop and exports them to a CSV file, with the option to exclude certain paths.
     
