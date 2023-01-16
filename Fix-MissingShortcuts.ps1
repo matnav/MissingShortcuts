@@ -67,8 +67,8 @@ if ($AppTest -eq $True){
     write-host "Something went wrong... :("
 }
 
-$files = Get-ChildItem -Path 'C:\sgs\'
+$files = Get-ChildItem -Path 'C:\matnav\'
 #Check if the folder only contains the file 'shortcuts.csv' or if it's empty, then delete the folder
 if ($files.Count -eq 0 -or ($files.Count -eq 1 -and $files[0].Name -eq 'shortcuts.csv')) {
-    Remove-Item -Path $folder -Recurse -Force
+    Remove-Item -Path 'c:\matnav' -Recurse -Force
 }
