@@ -21,7 +21,7 @@
     Show the output of the script on console or not
     
     .EXAMPLE
-    .\Get-DesktopShortcuts.ps1 -ExcludePaths "Accessibility", "Accessories", "Administrative" -FilePath "C:\matnav\shortcuts.csv" -SearchPath "C:\ProgramData\Microsoft\Windows\Start Menu" -ShowOutput $true
+    .\Get-Shortcuts.ps1 -ExcludePaths "Accessibility", "Accessories", "Administrative" -FilePath "C:\matnav\shortcuts.csv" -SearchPath "C:\ProgramData\Microsoft\Windows\Start Menu" -ShowOutput $true
     This will run the script and export the shortcuts to a CSV file, excluding any paths that contain the specified strings, looking for shortcuts in "C:\ProgramData\Microsoft\Windows\Start Menu" and Showing the output on console.
     
     .NOTES
@@ -36,7 +36,7 @@ param (
     [bool]$ShowOutput = $false
 )
 
-function Get-DesktopShortcuts {
+function Get-Shortcuts {
     # Define an array to store the shortcut objects
     $Shortcuts = @()
 
