@@ -4,11 +4,11 @@
 # Purpose: Replaces missing shortcuts with a template file containing the shortcut files.
 
 # Import CSV file containing shortcuts
-$ImportedCSV = Invoke-WebRequest https://raw.githubusercontent.com/matnav/MissingShortcuts/main/shortcuts.csv -OutFile C:\matnav\shortcuts.csv 
-Import-Csv -Path C:\matnav\shortcuts.csv
+$ImportedCSV = .{Invoke-WebRequest https://raw.githubusercontent.com/matnav/MissingShortcuts/main/shortcuts.csv -OutFile C:\matnav\shortcuts.csv 
+Import-Csv -Path C:\matnav\shortcuts.csv}
 
-# Test if the target path of the shortcuts exist
-$AppTest = Test-Path -Path $MissingShortcut.ShortcutFull -PathType Leaf
+# Test if the application is installed
+$AppTest = Test-Path -Path $ImportedCSV.Target -PathType Leaf
 
 # Create a shortcut on the Public Desktop - This block of code uses the WScript.Shell COM object to create a shortcut on the Public Desktop. Please note that the Test-Path method doesn't work correctly with hidden files, so this is a quick workaround. To use it, simply uncomment the code and change the target path, description and icon location to suit your needs.
 	#$ComObj = New-Object -ComObject WScript.Shell
@@ -25,7 +25,7 @@ $MissingShortcuts = 0
 # if the shortcut doesn't exist, create it and keep count of missing shortcuts
 if ($AppTest -eq $True){
     ForEach ($MissingShortcut in $ImportedCSV) {
-        if(!(Test-Path -Path $ImportedCSV.ShortcutFull)) {
+        if(!(Test-Path -Path $MissingShortcut.ShortcutFull)) {
             write-host "Replacing missing shortcut for " $MissingShortcut.ShortcutName
             $ComObj = New-Object -ComObject WScript.Shell
             $ShortCut = $ComObj.CreateShortcut($MissingShortcut.ShortcutFull)
