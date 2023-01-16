@@ -55,12 +55,13 @@ $Properties = @{
 ShortcutName = $Shortcut.Name
 ShortcutFull = $Shortcut.FullName
 ShortcutPath = $shortcut.DirectoryName
-Target = $Shell.CreateShortcut($Shortcut).targetpath
+Target = $Shell.CreateShortcut($Shortcut).TargetPath
+Arguments = $Shell.CreateShortcut($Shortcut).Arguments
 WorkingDirectory = $Shell.CreateShortcut($Shortcut).WorkingDirectory
 }
 $Shortcuts += New-Object PSObject -Property $Properties
 if($ShowOutput){
-Write-Output "ShortcutName: $($Properties.ShortcutName) ShortcutFull: $($Properties.ShortcutFull) ShortcutPath: $($Properties.ShortcutPath) Target: $($Properties.Target) WorkingDirectory: $($Properties.WorkingDirectory)"
+Write-Output "ShortcutName: $($Properties.ShortcutName) ShortcutFull: $($Properties.ShortcutFull) ShortcutPath: $($Properties.ShortcutPath) Target: $($Properties.Target) Arguments: $($Properties.Arguments) WorkingDirectory: $($Properties.WorkingDirectory)"
 }
 }
 }
