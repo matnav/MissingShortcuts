@@ -1,73 +1,80 @@
-# Script Name: Fix-MissingShortcuts.ps1
-# Author: Matthew Navarette
-# Date Created: January 14, 2023
-# Purpose: Replaces missing shortcuts with a template file containing the shortcut files.
+<#
+    .SYNOPSIS
+    This script is used to collect all the shortcuts in the Start Menu and export them to a CSV file for replication or transfer. The script also includes the option to exclude certain paths from the search.
+    
+    .DESCRIPTION
+    The script uses the Get-ChildItem cmdlet to recursively search the Start Menu folder for all shortcuts and also checks if the shortcut is accessible or not.
+    Then it uses the WScript.Shell COM object to retrieve properties of the shortcuts. 
+    The properties are then stored in a custom object, which is added to an array. 
+    The array is then exported to a CSV file. This file can then be used to replicate the shortcuts on another computer or transfer them to another location.
+    
+    .PARAMETER ExcludePaths
+    The paths that you want to exclude when searching for shortcuts. These can be partial paths, and will match any path that contains the specified string.
+    
+    .PARAMETER FilePath
+    The path where the CSV file will be exported to.
+    
+    .PARAMETER SearchPath
+    The path where the script looks for the shortcuts
 
-# Define the location of the folder where the CSV file will be stored
-$folder = 'C:\matnav\'
-# Define the URL of the CSV file containing the shortcuts
-$hostedcsv = 'https://raw.githubusercontent.com/matnav/MissingShortcuts/main/shortcuts.csv'
+    .PARAMETER CSVHeader
+    If set to $True, the first line of the CSV file will contain headers for the columns.
+    
+    .EXAMPLE
+    .\Get-Shortcuts.ps1 -ExcludePaths "Accessibility", "Accessories", "Administrative" -FilePath "C:\shortcuts.csv" -SearchPath "C:\ProgramData\Microsoft\Windows\Start Menu" -CSVHeader $True
+    This will run the script and export the shortcuts to a CSV file, excluding any paths that contain the specified strings, looking for shortcuts in "C:\ProgramData\Microsoft\Windows\Start Menu" and adding headers in the first line of the CSV file.
+    
+    .NOTES
+    Author: Matthew Navarette
+    Date Created: January 14, 2023
+    #>
 
-# Check if the folder exists, if not create the folder
-if (!(Test-Path -Path $folder)) {New-Item -ItemType Directory -Path $folder}
+param (
+    [string[]]$ExcludePaths = @(),
+    [string]$FilePath = "C:\shortcuts.csv",
+    [string]$SearchPath = "C:\ProgramData\Microsoft\Windows\Start Menu",
+    [bool]$CSVHeader = $True
+)
 
-# Import CSV file containing shortcuts
-# Download the CSV file from the specified URL and save it to the defined folder
-# then import the CSV file into a variable
-$ImportedCSV = .{Invoke-WebRequest $hostedcsv OutFile "$folder\shortcuts.csv"
-Import-Csv -Path "$folder\shortcuts.csv"}
+function Get-Shortcuts {
+    # Define an array to store the shortcut objects
+    $Shortcuts = @()
 
-# Test if the application is installed
-# Check if the target path specified in the CSV file exists
-$AppTest = Test-Path -Path $ImportedCSV.Target -PathType Leaf
+    # Get all the shortcuts in the Start Menu folder
+    $AllShortcuts = Get-ChildItem -Recurse $SearchPath -Include *.lnk
 
-# Create a shortcut on the Public Desktop
-# This block of code uses the WScript.Shell COM object to create a shortcut on the Public Desktop. 
-# Please note that the Test-Path method doesn't work correctly with hidden files, so this is a quick workaround. 
-# To use it, simply uncomment the code and change the target path, description and icon location to suit your needs.
-	#$ComObj = New-Object -ComObject WScript.Shell
-		#$ShortCut = $ComObj.CreateShortcut("C:\path\to\shortcut.lnk")
-		#$ShortCut.TargetPath = "C:\path\to\program.exe"
-		#$ShortCut.Description = "Program Name"
-		#$ShortCut.IconLocation = "C:\path\to\icon.ico"
-		#$ShortCut.FullName 
-		#$ShortCut.WindowStyle = 1
-		#$ShortCut.Save()
+    # Create a WScript.Shell object
+    $Shell = New-Object -ComObject WScript.Shell
 
-# Counter for missing shortcuts
-$MissingShortcuts = 0
-
-# Check if the target path exist, if true then check if the shortcut exist
-# if the shortcut doesn't exist, create it and keep count of missing shortcuts
-if ($AppTest -eq $True){
-    ForEach ($MissingShortcut in $ImportedCSV) {
-        if(!(Test-Path -Path $MissingShortcut.ShortcutFull)) {
-            write-host "Replacing missing shortcut for " $MissingShortcut.ShortcutName
-            # Create a new shortcut using the WScript.Shell COM object
-            $ComObj = New-Object -ComObject WScript.Shell
-            $ShortCut = $ComObj.CreateShortcut($MissingShortcut.ShortcutFull)
-            # Set the target path, description, and working directory of the shortcut
-            $ShortCut.TargetPath = $MissingShortcut.Target
-            $ShortCut.Description = $MissingShortcut.ShortcutName
-            $ShortCut.WorkingDirectory = $MissingShortcut.WorkingDirectory
-            # Save the shortcut
-            $ShortCut.FullName 
-            $ShortCut.WindowStyle = 1
-            $ShortCut.Save()
-            # Increase the missing shortcuts counter
-            $MissingShortcuts++
-        }
-    }
-    # Check if any missing shortcuts were found
-    if($MissingShortcuts -eq 0) {
-        write-host "No missing shortcuts were found"
-    }
+    # Loop through each shortcut
+    foreach ($Shortcut in $AllShortcuts) {
+        # Check if the shortcut path contains any of the excluded strings
+        if ($ExcludePaths -notcontains ($Shortcut.DirectoryName | Select-String -SimpleMatch -Quiet)) {
+            try {
+                # Create a custom object to store the shortcut properties
+                $Properties = @{
+                    ShortcutName = $Shortcut.Name
+                    ShortcutFull = $Shortcut.FullName
+                    ShortcutPath = $shortcut.DirectoryName
+                    Target = $Shell.CreateShortcut($Shortcut).targetpath
+                    WorkingDirectory = $Shell.CreateShortcut($Shortcut).WorkingDirectory
+}
+$Shortcuts += New-Object PSObject -Property $Properties
+} catch {
+Write-Warning "Failed to get properties for shortcut $($Shortcut.FullName). Error: $_"
+}
+}
+}
+# Release the COM object
+[Runtime.InteropServices.Marshal]::ReleaseComObject($Shell) | Out-Null
+# Export the array to a CSV file
+if ($CSVHeader) {
+$Shortcuts | Select-Object ShortcutName, ShortcutFull, ShortcutPath, Target, WorkingDirectory | Export-Csv $FilePath -NoTypeInformation -Force
 } else {
-    write-host "Something went wrong... :("
+$Shortcuts | Export-Csv $FilePath -NoTypeInformation -Force
+}
+# Return the number of shortcuts found
+Write-Output "Found $($Shortcuts.Count) shortcuts"
 }
 
-$files = Get-ChildItem -Path $folder
-#Check if the folder only contains the file 'shortcuts.csv' or if it's empty, then delete the folder
-if ($files.Count -eq 0 -or ($files.Count -eq 1 -and $files[0].Name -eq 'shortcuts.csv')) {
-    Remove-Item -Path $folder -Recurse -Force
-}
+Get-Shortcuts
