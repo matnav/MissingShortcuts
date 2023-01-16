@@ -65,8 +65,9 @@ if ($AppTest -eq $True){
 } else {
     write-host "Something went wrong... :("
 }
-#Check if the folder only contains the file 'shortcuts.csv' and if it does it will delete the folder, otherwise it will leave the folder intact.
+
 $files = Get-ChildItem -Path $folder
-if ($files.Count -eq 1 -and $files[0].Name -eq 'shortcuts.csv') {
+#Check if the folder only contains the file 'shortcuts.csv' or if it's empty, then delete the folder
+if ($files.Count -eq 0 -or ($files.Count -eq 1 -and $files[0].Name -eq 'shortcuts.csv')) {
     Remove-Item -Path $folder -Recurse -Force
 }
