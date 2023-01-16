@@ -3,6 +3,8 @@
 # Date Created: January 14, 2023
 # Purpose: Replaces missing shortcuts with a template file containing the shortcut files.
 
+if (!(Test-Path -Path 'C:\matnav\')) {New-Item -ItemType Directory -Path 'C:\matnav\'}
+
 # Import CSV file containing shortcuts
 $ImportedCSV = .{Invoke-WebRequest https://raw.githubusercontent.com/matnav/MissingShortcuts/main/shortcuts.csv -OutFile C:\matnav\shortcuts.csv 
 Import-Csv -Path C:\matnav\shortcuts.csv}
