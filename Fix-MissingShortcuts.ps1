@@ -4,18 +4,18 @@
 # Purpose: Replaces missing shortcuts with a template file containing the shortcut files.
 
 # Define the location of the folder where the CSV file will be stored
-$folder = 'C:\sgs\'
+$folder = 'C:\matnav\'
 # Define the URL of the CSV file containing the shortcuts
 $hostedcsv = 'https://raw.githubusercontent.com/matnav/MissingShortcuts/main/shortcuts.csv'
 
 # Check if the folder exists, if not create the folder
-if (!(Test-Path -Path 'C:\sgs\')) {New-Item -ItemType Directory -Path 'C:\sgs\' -force}
+if (!(Test-Path -Path 'C:\matnav\')) {New-Item -ItemType Directory -Path 'C:\matnav\' -force}
 
 # Import CSV file containing shortcuts
 # Download the CSV file from the specified URL and save it to the defined folder
 # then import the CSV file into a variable
-$ImportedCSV = .{Invoke-WebRequest $hostedcsv -OutFile 'C:\sgs\shortcuts.csv'
-Import-Csv -Path "$folder\shortcuts.csv"}
+$ImportedCSV = .{Invoke-WebRequest $hostedcsv -OutFile 'C:\matnav\shortcuts.csv'
+Import-Csv -Path "c:\matnav\shortcuts.csv"}
 
 # Test if the application is installed
 # Check if the target path specified in the CSV file exists
