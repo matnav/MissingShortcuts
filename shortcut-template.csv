@@ -1,4 +1,2 @@
-"ShortcutFull","ShortcutName","ShortcutPath","Target","WorkingDirectory"
-"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip\7-Zip File Manager.lnk","7-Zip File Manager.lnk","C:\ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip","C:\Program Files\7-Zip\7zFM.exe",""
-"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip\7-Zip Help.lnk","7-Zip Help.lnk","C:\ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip","C:\Program Files\7-Zip\7-zip.chm",""
-"C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Accessibility\Speech Recognition.lnk","Speech Recognition.lnk","C:\ProgramData\Microsoft\Windows\Start Menu\Programs\Accessibility","C:\WINDOWS\Speech\Common\sapisvr.exe","%windir%\system32\Speech\SpeechUX"
+"WorkingDirectory","ShortcutName","ShortcutFull","ShortcutPath","Target","Arguments"
+"","7-Zip File Manager.lnk","C:\ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip\7-Zip File Manager.lnk","C:\ProgramData\Microsoft\Windows\Start Menu\Programs\7-Zip","C:\Program Files\7-Zip\7zFM.exe",""
