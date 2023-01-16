@@ -4,17 +4,17 @@
 # Purpose: Replaces missing shortcuts with a template file containing the shortcut files.
 
 # Define the location of the folder where the CSV file will be stored
-$folder = 'C:\matnav\'
+$folder = 'C:\sgs\'
 # Define the URL of the CSV file containing the shortcuts
 $hostedcsv = 'https://raw.githubusercontent.com/matnav/MissingShortcuts/main/shortcuts.csv'
 
 # Check if the folder exists, if not create the folder
-if (!(Test-Path -Path $folder)) {New-Item -ItemType Directory -Path $folder}
+if (!(Test-Path -Path 'C:\sgs\')) {New-Item -ItemType Directory -Path 'C:\sgs\' -force}
 
 # Import CSV file containing shortcuts
 # Download the CSV file from the specified URL and save it to the defined folder
 # then import the CSV file into a variable
-$ImportedCSV = .{Invoke-WebRequest $hostedcsv OutFile "$folder\shortcuts.csv"
+$ImportedCSV = .{Invoke-WebRequest $hostedcsv -OutFile 'C:\sgs\shortcuts.csv'
 Import-Csv -Path "$folder\shortcuts.csv"}
 
 # Test if the application is installed
@@ -40,7 +40,8 @@ $MissingShortcuts = 0
 # Check if the target path exist, if true then check if the shortcut exist
 # if the shortcut doesn't exist, create it and keep count of missing shortcuts
 if ($AppTest -eq $True){
-    ForEach ($MissingShortcut in $ImportedCSV) {
+    $validRows = $ImportedCSV | Where-Object {(Test-Path -Path $_.Target -PathType Leaf)}
+    ForEach ($MissingShortcut in $validRows) {
         if(!(Test-Path -Path $MissingShortcut.ShortcutFull)) {
             write-host "Replacing missing shortcut for " $MissingShortcut.ShortcutName
             # Create a new shortcut using the WScript.Shell COM object
@@ -66,7 +67,7 @@ if ($AppTest -eq $True){
     write-host "Something went wrong... :("
 }
 
-$files = Get-ChildItem -Path $folder
+$files = Get-ChildItem -Path 'C:\sgs\'
 #Check if the folder only contains the file 'shortcuts.csv' or if it's empty, then delete the folder
 if ($files.Count -eq 0 -or ($files.Count -eq 1 -and $files[0].Name -eq 'shortcuts.csv')) {
     Remove-Item -Path $folder -Recurse -Force
