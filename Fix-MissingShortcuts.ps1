@@ -9,13 +9,13 @@ $folder = 'C:\matnav\'
 $hostedcsv = 'https://raw.githubusercontent.com/matnav/MissingShortcuts/main/shortcuts.csv'
 
 # Check if the folder exists, if not create the folder
-if (!(Test-Path -Path 'C:\matnav\')) {New-Item -ItemType Directory -Path 'C:\matnav\' -force}
+if (!(Test-Path -Path 'C:\matnav\')) { New-Item -ItemType Directory -Path 'C:\matnav\' -force }
 
 # Import CSV file containing shortcuts
 # Download the CSV file from the specified URL and save it to the defined folder
 # then import the CSV file into a variable
-$ImportedCSV = .{Invoke-WebRequest $hostedcsv -OutFile 'C:\matnav\shortcuts.csv'
-Import-Csv -Path "c:\matnav\shortcuts.csv"}
+$ImportedCSV = .{ Invoke-WebRequest $hostedcsv -OutFile 'C:\matnav\shortcuts.csv'
+    Import-Csv -Path "c:\matnav\shortcuts.csv" }
 
 # Test if the application is installed
 # Check if the target path specified in the CSV file exists
@@ -25,24 +25,24 @@ $AppTest = Test-Path -Path $ImportedCSV.Target -PathType Leaf
 # This block of code uses the WScript.Shell COM object to create a shortcut on the Public Desktop. 
 # Please note that the Test-Path method doesn't work correctly with hidden files, so this is a quick workaround. 
 # To use it, simply uncomment the code and change the target path, description and icon location to suit your needs.
-	#$ComObj = New-Object -ComObject WScript.Shell
-		#$ShortCut = $ComObj.CreateShortcut("C:\path\to\shortcut.lnk")
-		#$ShortCut.TargetPath = "C:\path\to\program.exe"
-		#$ShortCut.Description = "Program Name"
-		#$ShortCut.IconLocation = "C:\path\to\icon.ico"
-		#$ShortCut.FullName 
-		#$ShortCut.WindowStyle = 1
-		#$ShortCut.Save()
+#$ComObj = New-Object -ComObject WScript.Shell
+#$ShortCut = $ComObj.CreateShortcut("C:\path\to\shortcut.lnk")
+#$ShortCut.TargetPath = "C:\path\to\program.exe"
+#$ShortCut.Description = "Program Name"
+#$ShortCut.IconLocation = "C:\path\to\icon.ico"
+#$ShortCut.FullName 
+#$ShortCut.WindowStyle = 1
+#$ShortCut.Save()
 
 # Counter for missing shortcuts
 $MissingShortcuts = 0
 
 # Check if the target path exist, if true then check if the shortcut exist
 # if the shortcut doesn't exist, create it and keep count of missing shortcuts
-if ($AppTest -eq $True){
-    $validRows = $ImportedCSV | Where-Object {(Test-Path -Path $_.Target -PathType Leaf)}
+if ($AppTest -eq $True) {
+    $validRows = $ImportedCSV | Where-Object { (Test-Path -Path $_.Target -PathType Leaf) }
     ForEach ($MissingShortcut in $validRows) {
-        if(!(Test-Path -Path $MissingShortcut.ShortcutFull)) {
+        if (!(Test-Path -Path $MissingShortcut.ShortcutFull)) {
             write-host "Replacing missing shortcut for " $MissingShortcut.ShortcutName
             # Create a new shortcut using the WScript.Shell COM object
             $ComObj = New-Object -ComObject WScript.Shell
@@ -60,10 +60,11 @@ if ($AppTest -eq $True){
         }
     }
     # Check if any missing shortcuts were found
-    if($MissingShortcuts -eq 0) {
+    if ($MissingShortcuts -eq 0) {
         write-host "No missing shortcuts were found"
     }
-} else {
+}
+else {
     write-host "Something went wrong... :("
 }
 
