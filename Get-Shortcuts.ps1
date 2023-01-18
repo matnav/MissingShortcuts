@@ -29,7 +29,7 @@ function Get-Shortcuts {
                 WorkingDirectory = $Shell.CreateShortcut($Shortcut).WorkingDirectory
             }
             $Shortcuts += New-Object PSObject -Property $Properties
-            if($ShowOutput){
+            if ($ShowOutput) {
                 Write-Output "ShortcutName: $($Properties.ShortcutName) ShortcutFull: $($Properties.ShortcutFull) ShortcutPath: $($Properties.ShortcutPath) Target: $($Properties.Target) Arguments: $($Properties.Arguments) WorkingDirectory: $($Properties.WorkingDirectory)"
             }
         }
@@ -46,7 +46,7 @@ function Get-Shortcuts {
                     WorkingDirectory = $Shell.CreateShortcut($Shortcut).WorkingDirectory
                 }
                 $Shortcuts += New-Object PSObject -Property $Properties
-                if($ShowOutput){
+                if ($ShowOutput) {
                     Write-Output "ShortcutName: $($Properties.ShortcutName) ShortcutFull: $($Properties.ShortcutFull) ShortcutPath: $($Properties.ShortcutPath) Target: $($Properties.Target) Arguments: $($Properties.Arguments) WorkingDirectory: $($Properties.WorkingDirectory)"
                 }
             }
@@ -54,9 +54,9 @@ function Get-Shortcuts {
     }
     # Release the COM object
     [Runtime.InteropServices.Marshal]::ReleaseComObject($Shell) | Out-Null
-        if (!(Test-Path -Path $FilePath)) {
+    if (!(Test-Path -Path $FilePath)) {
         # Create the parent directory if it does not exist
-        New-Item -ItemType Directory -Path (Split-Path $FilePath -Parent)  -ErrorAction SilentlyContinue| Out-Null
+        New-Item -ItemType Directory -Path (Split-Path $FilePath -Parent)  -ErrorAction SilentlyContinue | Out-Null
     }
     # Export the array to a CSV file
     $Shortcuts | Export-Csv -Path $FilePath -NoTypeInformation -Force
